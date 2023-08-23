@@ -1,20 +1,21 @@
 "use client";
-import Link from "next/link";
-import Image from "next/image";
 import {signIn,signOut,useSession,getProviders} from "next-auth/react";
 import { useState,useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
 
 const Nav = () => {
-  const isLogin = true;
+  const { data: session } = useSession();
+  console.log(session);
   const [providers, setProviders] = useState(null);
   const [toggleDropDown , setToggleDropDown ] = useState(false);
   useEffect(()=>{
-    const setProviders = async ()=>{
+    const setUpProviders = async ()=>{
       const response = await getProviders();
 
       setProviders(response);
     }
-    setProviders()
+    setUpProviders()
   },[])
   return (
     <nav className="flex-between w-full mb-16 pt-3">
@@ -23,14 +24,15 @@ const Nav = () => {
         <p className="text_logo">Promptopia</p>
       </Link>
       {/* desktop navigation */}
+      
       <div className="sm:flex hidden">
         {
-          isLogin ? (
+          session?.user ? (
             <div className="flex gap-3 md:gap-5">
               <Link href="/create-prompt" className="black_btn">Create Post</Link>
-              <button type="button" onClick={signOut}>Sign Out</button>
+              <button type="button" onClick={signOut} className="outline_btn">Sign Out</button>
               <Link href="/profile">
-                <Image src="/assets/images/logo.svg" alt="profile" width={37} height={37} className="rounded-full"/>
+                <Image src={session?.user.image} alt="profile" width={37} height={37} className="rounded-full"/>
               </Link>
             </div>
           ):
@@ -42,11 +44,12 @@ const Nav = () => {
             )
         }
       </div>
+        
       {/* mobile navigations */}
       <div className="sm:hidden flex relative">
-      {isLogin ? (
+      {session?.user ? (
         <div className="flex">
-          <Image src="/assets/images/logo.svg" alt="profile" width={37} height={37} className="rounded-full" onClick={()=> setToggleDropDown(prev=> !prev)}/>
+          <Image src={session?.user.image} alt="profile" width={37} height={37} className="rounded-full" onClick={()=> setToggleDropDown(prev=> !prev)}/>
           {
             toggleDropDown && (
             <div className="dropdown">
